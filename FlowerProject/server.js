@@ -2,18 +2,34 @@ var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
+var users = {}; // aka the sockets
 /*
 io.on('connection', function(socket){
       console.log('a user connected!');
 });
 */
 io.on('connection', function (client) {
-  client.on('subscribeToTimer', function (interval) {
-    console.log('client is subscribing to timer with interval ', interval);
-    setInterval(() => {
-      client.emit('timer', new Date());
-    }, interval);
-  });
+	// on connection
+	console.log('a user connected');
+	
+	// subscribe to timer
+	client.on('subscribeToTimer', function (interval) {
+		console.log('client is subscribing to timer with interval ', interval);
+		setInterval(() => {
+		  client.emit('timer', new Date());
+		}, interval);
+	});
+	
+	// add points 
+	client.on('addPoints', function (total) {
+		console.log('Aloha! Adding points here!!!');
+		client.emit('userPoints', total);
+	});
+	
+	// on disconnect 
+	client.on('disconnect', function(){
+		console.log('user disconnected');
+	});
 });
 
 http.listen(3000, function(){
